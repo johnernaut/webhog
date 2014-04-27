@@ -1,0 +1,8 @@
+development:
+  mysql:      127.0.0.1:3306
+  db_name:    webhog_development
+  api_key:    SCRAPEAPI
+  aws_key:    AWSKEY
+  aws_secret: AWSSECRET
+production:
+staging:

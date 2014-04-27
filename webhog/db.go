@@ -34,7 +34,8 @@ func Register(m Model) {
 // Connect to the given database and pass the connection into
 // our Connection object for re-use.
 func ConnectDB() {
-	db, err := sql.Open("mysql", "root:@tcp()/webhog_development")
+	tcpString := "@tcp(" + Config.mysql + ")"
+	db, err := sql.Open("mysql", "root:"+tcpString+"/"+Config.dbName)
 
 	if err != nil {
 		log.Panic(err)

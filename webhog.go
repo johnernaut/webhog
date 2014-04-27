@@ -18,6 +18,9 @@ func main() {
 	// All the parallelism are belong to us!
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
+	// Load configuration file.
+	webhog.LoadConfig()
+
 	// Make a database connection.
 	webhog.ConnectDB()
 
@@ -32,7 +35,7 @@ func main() {
 
 	// Middleware to make sure each request has a specified API key
 	m.Use(func(res http.ResponseWriter, req *http.Request, r render.Render) {
-		if req.Header.Get("X-API-KEY") != "SCRAPEAPI" {
+		if req.Header.Get("X-API-KEY") != webhog.Config.ApiKey {
 			r.JSON(401, map[string]interface{}{"error": "Invalid API key."})
 		}
 	})
