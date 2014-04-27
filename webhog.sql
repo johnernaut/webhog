@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS entities (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  uuid VARCHAR(255),
+  aws_link VARCHAR(255),
+  status VARCHAR(255),
+  url VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP
+);
