@@ -96,25 +96,7 @@ func extractAttrs(n *html.Node, entity *Entity, wg *sync.WaitGroup) {
 			for i := range n.Attr {
 				attr := &n.Attr[i]
 				if attr.Key == p {
-					// match css and js extentions
-					match := rxExt.FindStringSubmatch(attr.Val)
-
-					// check if a full URL is given to the entity, otherwise
-					// we need to create one for the resource.
-					matched, err := regexp.MatchString("http.*", attr.Val)
-					if err != nil {
-						log.Println("Error matching regex http(s): ", err)
-					}
-
-					if len(match) > 0 && matched {
-						// Download and persist the current resource and insert it's
-						// new name in the value of the HTML tree.
-						name, err := StoreResource(attr.Val, string(match[0]), EntityDir)
-						if err != nil {
-							log.Println("Error storing resource: ", err)
-						}
-						attr.Val = name
-					}
+					matchAttrs(attr, entity)
 				}
 			}
 		}
@@ -123,6 +105,50 @@ func extractAttrs(n *html.Node, entity *Entity, wg *sync.WaitGroup) {
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
 		wg.Add(1)
 		go extractAttrs(c, entity, wg)
+	}
+}
+
+// match found attr file types and check src/href for a
+// fullpath URL
+func matchAttrs(attr *html.Attribute, entity *Entity) {
+	// match css and js extentions
+	match := rxExt.FindStringSubmatch(attr.Val)
+
+	// check if a full URL is given to the entity, otherwise
+	// we need to create one for the resource.
+	matched, err := regexp.MatchString("http.*", attr.Val)
+	if err != nil {
+		log.Println("Error matching regex http(s): ", err)
+	}
+
+	// valid filetype and there is a full URL we can use
+	if len(match) > 0 && matched {
+		// Download and persist the current resource and insert it's
+		// new name in the value of the HTML tree.
+		name, err := StoreResource(attr.Val, string(match[0]), EntityDir)
+		if err != nil {
+			log.Println("Error storing resource: ", err)
+		}
+		attr.Val = name
+	}
+
+	// valid filetype but there is a relative URL
+	if len(match) > 0 && !matched {
+		// new resource name after adding in full URL
+		var updName string
+		// check for trailing slash on the entities' URL
+		ln := len(entity.Url)
+		if string(entity.Url[ln-1]) == "/" {
+			updName = entity.Url + attr.Val
+		} else {
+			updName = entity.Url + "/" + attr.Val
+		}
+
+		name, err := StoreResource(updName, string(match[0]), EntityDir)
+		if err != nil {
+			log.Println("Error storing resource: ", err)
+		}
+		attr.Val = name
 	}
 }
 
