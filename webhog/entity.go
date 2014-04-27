@@ -1,6 +1,7 @@
 package webhog
 
 import (
+	"database/sql"
 	"log"
 	"time"
 )
@@ -22,19 +23,27 @@ type Entity struct {
 func (entity *Entity) Find(query string) (result *Entity) {
 	rows, err := Connection.Db.Query("SELECT id,uuid,url,aws_link,status FROM entities WHERE url=? LIMIT 1", query)
 	if err != nil {
-		log.Println(err)
+		log.Println("Query error in find: ", err)
 	}
 
 	for rows.Next() {
-		if err := rows.Scan(&entity.Id, &entity.UUID, &entity.Url, &entity.AwsLink, &entity.Status); err != nil {
-			log.Println(err)
+		var s sql.NullString
+		if err := rows.Scan(&entity.Id, &entity.UUID, &entity.Url, &s, &entity.Status); err != nil {
+			log.Println("Scan error in find: ", err)
+		}
+
+		// handling null strings with the sql driver is highly irritating
+		if s.Valid {
+			entity.AwsLink = s.String
+		} else {
+			entity.AwsLink = ""
 		}
 
 		return entity
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Println(err)
+		log.Println("Row error in find: ", err)
 	}
 
 	return entity
@@ -44,7 +53,7 @@ func (entity *Entity) Find(query string) (result *Entity) {
 func (entity *Entity) Create() (result *Entity) {
 	res, err := Connection.Db.Exec("INSERT INTO entities(uuid, url, status) VALUES(?, ?, ?)", entity.UUID, entity.Url, entity.Status)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error in exec: ", err)
 	}
 
 	lastId, err := res.LastInsertId()
