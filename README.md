@@ -25,6 +25,4 @@ staging:
 ```
 
 ##TODO
-* add in configuration options for S3 key, API key, etc...
-* add configuration option to specify DB name / hosts
 * finish ZIP / Upload to S3 functionality

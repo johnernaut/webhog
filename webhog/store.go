@@ -2,6 +2,7 @@ package webhog
 
 import (
 	"bytes"
+	"compress/gzip"
 	"crypto/rand"
 	"io"
 	"io/ioutil"
@@ -90,6 +91,44 @@ func StoreHTML(html bytes.Buffer, entDir string) (err error) {
 	if err != nil {
 		return err
 	}
+
+	return err
+}
+
+func ArchiveFinalFiles(entDir string) (err error) {
+	var buf = new(bytes.Buffer)
+	gz := gzip.NewWriter(buf)
+
+	defer gz.Close()
+
+	files, err := ioutil.ReadDir(entDir)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		data, err := ioutil.ReadFile(entDir + "/" + file.Name())
+		if err != nil {
+			return err
+		}
+
+		_, err = gz.Write(data)
+		if err != nil {
+			return err
+		}
+
+		f, err := os.Create(entDir + "/" + file.Name() + ".gz")
+		if err != nil {
+			return err
+		}
+
+		_, err = io.Copy(f, buf)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = gz.Close()
 
 	return err
 }

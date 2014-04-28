@@ -11,6 +11,7 @@ type configuration struct {
 	ApiKey    string
 	awsKey    string
 	awsSecret string
+	bucket    string
 }
 
 var Config = new(configuration)
@@ -26,6 +27,7 @@ func LoadConfig() error {
 	Config.ApiKey, _ = conf.Get(getEnv() + ".api_key")
 	Config.awsKey, _ = conf.Get(getEnv() + ".aws_key")
 	Config.awsSecret, _ = conf.Get(getEnv() + ".aws_secret")
+	Config.bucket, _ = conf.Get(getEnv() + ".bucket")
 
 	return err
 }

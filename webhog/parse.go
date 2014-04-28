@@ -13,9 +13,6 @@ import (
 	"sync"
 )
 
-var addCounter = 0
-var doneCounter = 0
-
 // Regex to match css and js extentions.
 var rxExt = regexp.MustCompile(`(\.(?:css|js|gif|png|jpg))\/?$`)
 
@@ -71,6 +68,11 @@ func ExtractData(entity *Entity, url string) {
 			if err != nil {
 				log.Println("Error in StoreHTML: ", err)
 			}
+
+			// err = ArchiveFinalFiles(EntityDir)
+			// if err != nil {
+			// 	log.Println("Error in archive final files: ", err)
+			// }
 		default:
 		}
 	}
@@ -185,7 +187,7 @@ func createNewEntity(url string, entity *Entity) (e *Entity, err error) {
 	entity.UUID = id.String()
 
 	// Persist new entity into the database.
-	entity = entity.Create()
+	// entity = entity.Create()
 
 	return entity, err
 }
