@@ -5,6 +5,7 @@ import (
 	"github.com/johnernaut/webhog/webhog"
 	"github.com/martini-contrib/binding"
 	"github.com/martini-contrib/render"
+	"labix.org/v2/mgo"
 	"net/http"
 	"runtime"
 )
@@ -21,14 +22,11 @@ func main() {
 	// Load configuration file.
 	webhog.LoadConfig()
 
-	// Make a database connection.
-	webhog.ConnectDB()
-
 	// Start the server.
 	m := martini.Classic()
 
-	m.Use(martini.Logger())
 	m.Use(render.Renderer())
+	m.Use(webhog.DB())
 
 	// Middleware to make sure each request has a specified API key
 	m.Use(func(res http.ResponseWriter, req *http.Request, r render.Render) {
@@ -37,9 +35,8 @@ func main() {
 		}
 	})
 
-	m.Post("/scrape", binding.Json(Url{}), func(url Url, r render.Render) {
-		entity, err := webhog.NewScraper(url.Url)
-		// dat, err := json.Marshal(entity)
+	m.Post("/scrape", binding.Json(Url{}), func(url Url, r render.Render, db *mgo.Collection) {
+		entity, err := webhog.NewScraper(url.Url, db)
 		if err != nil {
 			r.JSON(400, map[string]interface{}{"errors": err.Error()})
 		} else {
