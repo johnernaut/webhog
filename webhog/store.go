@@ -24,6 +24,7 @@ func NewEntityDir() (err error) {
 	return err
 }
 
+// Generate a random file name on the fly.
 func randFileName(str_size int) string {
 	alphanum := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	var bytes = make([]byte, str_size)

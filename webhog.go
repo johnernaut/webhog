@@ -24,9 +24,6 @@ func main() {
 	// Make a database connection.
 	webhog.ConnectDB()
 
-	// Load configuration options.
-	// webhog.LaunchConfig()
-
 	// Start the server.
 	m := martini.Classic()
 

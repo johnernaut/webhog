@@ -3,10 +3,11 @@ package webhog
 import (
 	"github.com/kylelemons/go-gypsy/yaml"
 	"os"
+	"strings"
 )
 
 type configuration struct {
-	mysql     string
+	mongodb   string
 	dbName    string
 	ApiKey    string
 	awsKey    string
@@ -22,7 +23,7 @@ func LoadConfig() error {
 		return err
 	}
 
-	Config.mysql, _ = conf.Get(getEnv() + ".mysql")
+	Config.mongodb, _ = conf.Get(getEnv() + ".mongodb")
 	Config.dbName, _ = conf.Get(getEnv() + ".db_name")
 	Config.ApiKey, _ = conf.Get(getEnv() + ".api_key")
 	Config.awsKey, _ = conf.Get(getEnv() + ".aws_key")
@@ -33,7 +34,7 @@ func LoadConfig() error {
 }
 
 func getEnv() string {
-	env := os.Getenv("GO_ENV")
+	env := strings.ToLower(os.Getenv("GO_ENV"))
 	if env == "" || env == "development" {
 		return "development"
 	}

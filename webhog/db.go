@@ -1,14 +1,13 @@
 package webhog
 
 import (
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"labix.org/v2/mgo"
 	"log"
 )
 
 // Holds an instance of the MySQL DB connection.
 type connection struct {
-	Db *sql.DB
+	Db *mgo.Database
 }
 
 // Interface that wraps DB models for a common
@@ -34,18 +33,12 @@ func Register(m Model) {
 // Connect to the given database and pass the connection into
 // our Connection object for re-use.
 func ConnectDB() {
-	tcpString := "@tcp(" + Config.mysql + ")"
-	db, err := sql.Open("mysql", "root:"+tcpString+"/"+Config.dbName)
-
+	session, err := mgo.Dial(Config.mongodb)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	Connection.Db = db
+	defer session.Close()
 
-	err = Connection.Db.Ping()
-
-	if err != nil {
-		log.Panic(err)
-	}
+	Connection.Db = session.DB("webhog")
 }

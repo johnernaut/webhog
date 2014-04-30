@@ -89,6 +89,7 @@ func ParseHTML(n *html.Node, entity *Entity, done chan bool) {
 	done <- true
 }
 
+// Extract attributes on elements that match css/js/link tags.
 func extractAttrs(n *html.Node, entity *Entity, wg *sync.WaitGroup) {
 	defer wg.Done()
 

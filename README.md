@@ -20,6 +20,7 @@ development:
   api_key: SCRAPEAPI
   aws_key: AWSKEY
   aws_secret: AWSSECRET
+  bucket: mybucket
 production:
 staging:
 ```
