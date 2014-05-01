@@ -8,7 +8,6 @@ import (
 
 type configuration struct {
 	mongodb   string
-	dbName    string
 	ApiKey    string
 	awsKey    string
 	awsSecret string
@@ -24,7 +23,6 @@ func LoadConfig() error {
 	}
 
 	Config.mongodb, _ = conf.Get(getEnv() + ".mongodb")
-	Config.dbName, _ = conf.Get(getEnv() + ".db_name")
 	Config.ApiKey, _ = conf.Get(getEnv() + ".api_key")
 	Config.awsKey, _ = conf.Get(getEnv() + ".aws_key")
 	Config.awsSecret, _ = conf.Get(getEnv() + ".aws_secret")

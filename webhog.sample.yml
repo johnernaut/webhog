@@ -1,6 +1,5 @@
 development:
   mongodb:    mongodb://127.0.0.1:27017/webhog
-  db_name:    webhog_development
   api_key:    SCRAPEAPI
   aws_key:    AWSKEY
   aws_secret: AWSSECRET
