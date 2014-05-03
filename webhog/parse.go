@@ -22,19 +22,20 @@ var rxExt = regexp.MustCompile(`(\.(?:css|js|gif|png|jpg))\/?$`)
 var matchVals = map[string]string{"link": "href", "script": "src", "img": "src"}
 
 // Start the scraping process.
-func NewScraper(url string) (e *Entity, err error) {
+func NewScraper(url string) (*Entity, error) {
 	entity := new(Entity)
 
 	// Return existing entity if it exists.
-	e, exists := checkExistingEntity(url, entity)
-	if exists {
-		return e, nil
+	err := checkExistingEntity(url, entity)
+	if err != nil {
+		if err = createNewEntity(url, entity); err != nil {
+			log.Panicln("Error creating new entity: ", err)
+		}
 	}
 
 	// Create a new entity.
-	e, err = createNewEntity(url, entity)
 
-	return e, err
+	return entity, err
 }
 
 // Make a GET request to the given URL and start parsing
@@ -159,20 +160,15 @@ func matchAttrs(attr *html.Attribute, entity *Entity) {
 
 // See if this URL has already been saved into the
 // database - if so, return it.
-func checkExistingEntity(url string, e *Entity) (entity *Entity, exists bool) {
-	exists = false
+func checkExistingEntity(url string, e *Entity) error {
+	err := e.Find(bson.M{"url": url})
 
-	en := e.Find(bson.M{"url": url})
-	if en.UUID != "" {
-		exists = true
-	}
-
-	return en, exists
+	return err
 }
 
 // Create a new entity to persist into the database - start HTML extraction.
-func createNewEntity(url string, entity *Entity) (e *Entity, err error) {
-	err = NewEntityDir()
+func createNewEntity(url string, entity *Entity) error {
+	err := NewEntityDir()
 	if err != nil {
 		log.Println("Error creating entity dir: ", err)
 	}
@@ -191,7 +187,7 @@ func createNewEntity(url string, entity *Entity) (e *Entity, err error) {
 	entity.CreatedAt = time.Now()
 
 	// Persist new entity into the database.
-	entity = entity.Create()
+	err = entity.Create()
 
-	return entity, err
+	return err
 }
