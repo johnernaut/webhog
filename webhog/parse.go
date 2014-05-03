@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"code.google.com/p/go.net/html"
 	uuid "github.com/nu7hatch/gouuid"
-	"labix.org/v2/mgo"
 	"log"
 	"net/http"
 	"regexp"
@@ -22,17 +21,17 @@ var rxExt = regexp.MustCompile(`(\.(?:css|js|gif|png|jpg))\/?$`)
 var matchVals = map[string]string{"link": "href", "script": "src", "img": "src"}
 
 // Start the scraping process.
-func NewScraper(url string, db *mgo.Collection) (e *Entity, err error) {
+func NewScraper(url string) (e *Entity, err error) {
 	entity := new(Entity)
 
 	// Return existing entity if it exists.
-	e, exists := checkExistingEntity(url, entity, db)
+	e, exists := checkExistingEntity(url, entity)
 	if exists {
 		return e, nil
 	}
 
 	// Create a new entity.
-	e, err = createNewEntity(url, entity, db)
+	e, err = createNewEntity(url, entity)
 
 	return e, err
 }
@@ -159,10 +158,10 @@ func matchAttrs(attr *html.Attribute, entity *Entity) {
 
 // See if this URL has already been saved into the
 // database - if so, return it.
-func checkExistingEntity(url string, e *Entity, db *mgo.Collection) (entity *Entity, exists bool) {
+func checkExistingEntity(url string, e *Entity) (entity *Entity, exists bool) {
 	exists = false
 
-	en := e.Find(url, db)
+	en := e.Find(url)
 	if en.UUID != "" {
 		exists = true
 	}
@@ -171,7 +170,7 @@ func checkExistingEntity(url string, e *Entity, db *mgo.Collection) (entity *Ent
 }
 
 // Create a new entity to persist into the database - start HTML extraction.
-func createNewEntity(url string, entity *Entity, db *mgo.Collection) (e *Entity, err error) {
+func createNewEntity(url string, entity *Entity) (e *Entity, err error) {
 	err = NewEntityDir()
 	if err != nil {
 		log.Println("Error creating entity dir: ", err)
@@ -191,7 +190,7 @@ func createNewEntity(url string, entity *Entity, db *mgo.Collection) (e *Entity,
 	entity.CreatedAt = time.Now()
 
 	// Persist new entity into the database.
-	entity = entity.Create(db)
+	entity = entity.Create()
 
 	return entity, err
 }
