@@ -17,7 +17,7 @@ var Db *connection
 // Interface that wraps DB models for a common
 // querying interface.
 type Model interface {
-	Find(string) *Entity
+	Find(interface{}) *Entity
 	Create() *Entity
 }
 

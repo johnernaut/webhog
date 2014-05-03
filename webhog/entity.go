@@ -19,9 +19,9 @@ type Entity struct {
 
 // Find an Entity by UUID and return the AWS S3 link (or status if upload
 // is incomplete) - create if it doesn't exist.
-func (entity *Entity) Find(query string) (result *Entity) {
+func (entity *Entity) Find(query interface{}) (result *Entity) {
 	// query is url
-	err := Db.C.Find(bson.M{"url": query}).One(&entity)
+	err := Db.C.Find(query).One(&entity)
 	if err != nil {
 		return entity
 	}

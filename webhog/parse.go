@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"code.google.com/p/go.net/html"
 	uuid "github.com/nu7hatch/gouuid"
+	"labix.org/v2/mgo/bson"
 	"log"
 	"net/http"
 	"regexp"
@@ -161,7 +162,7 @@ func matchAttrs(attr *html.Attribute, entity *Entity) {
 func checkExistingEntity(url string, e *Entity) (entity *Entity, exists bool) {
 	exists = false
 
-	en := e.Find(url)
+	en := e.Find(bson.M{"url": url})
 	if en.UUID != "" {
 		exists = true
 	}
