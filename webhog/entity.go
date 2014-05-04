@@ -1,6 +1,7 @@
 package webhog
 
 import (
+	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 	"time"
 )
@@ -18,16 +19,24 @@ type Entity struct {
 
 // Find an Entity by UUID and return the AWS S3 link (or status if upload
 // is incomplete) - create if it doesn't exist.
-func (entity *Entity) Find(query interface{}) error {
+func (entity *Entity) Find(query interface{}, db *mgo.Collection) error {
 	// query is url
-	err := Db.C.Find(query).One(&entity)
+	err := db.Find(query).One(&entity)
+
+	return err
+}
+
+// Update an entities' attributes
+func (entity *Entity) Update(query interface{}, updates interface{}, db *mgo.Collection) error {
+	// query is url
+	err := db.Update(query, updates)
 
 	return err
 }
 
 // Create a new entity object in the database.
-func (entity *Entity) Create() error {
-	err := Db.C.Insert(entity)
+func (entity *Entity) Create(db *mgo.Collection) error {
+	err := db.Insert(entity)
 
 	return err
 }

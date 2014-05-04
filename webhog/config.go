@@ -9,8 +9,8 @@ import (
 type configuration struct {
 	mongodb   string
 	ApiKey    string
-	awsKey    string
-	awsSecret string
+	AwsKey    string
+	AwsSecret string
 	bucket    string
 }
 
@@ -24,8 +24,8 @@ func LoadConfig() error {
 
 	Config.mongodb, _ = conf.Get(getEnv() + ".mongodb")
 	Config.ApiKey, _ = conf.Get(getEnv() + ".api_key")
-	Config.awsKey, _ = conf.Get(getEnv() + ".aws_key")
-	Config.awsSecret, _ = conf.Get(getEnv() + ".aws_secret")
+	Config.AwsKey, _ = conf.Get(getEnv() + ".aws_key")
+	Config.AwsSecret, _ = conf.Get(getEnv() + ".aws_secret")
 	Config.bucket, _ = conf.Get(getEnv() + ".bucket")
 
 	return err

@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"code.google.com/p/go.net/html"
 	uuid "github.com/nu7hatch/gouuid"
+	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 	"log"
 	"net/http"
@@ -22,13 +23,14 @@ var rxExt = regexp.MustCompile(`(\.(?:css|js|gif|png|jpg))\/?$`)
 var matchVals = map[string]string{"link": "href", "script": "src", "img": "src"}
 
 // Start the scraping process.
-func NewScraper(url string) (*Entity, error) {
+func NewScraper(url string, db *mgo.Collection) (*Entity, error) {
 	entity := new(Entity)
 
-	// Return existing entity if it exists.
-	err := checkExistingEntity(url, entity)
+	// Return existing entity if it exists, otherwise create a
+	// new one.
+	err := checkExistingEntity(url, entity, db)
 	if err != nil {
-		if err = createNewEntity(url, entity); err != nil {
+		if err = createNewEntity(url, entity, db); err != nil {
 			log.Panicln("Error creating new entity: ", err)
 		}
 	}
@@ -40,7 +42,7 @@ func NewScraper(url string) (*Entity, error) {
 
 // Make a GET request to the given URL and start parsing
 // its HTML.
-func ExtractData(entity *Entity, url string) {
+func ExtractData(entity *Entity, url string, db *mgo.Collection) {
 	// Parsing completion channel.
 	done := make(chan bool, 1)
 
@@ -72,9 +74,24 @@ func ExtractData(entity *Entity, url string) {
 				log.Println("Error in StoreHTML: ", err)
 			}
 
-			// err = ArchiveFinalFiles(EntityDir)
+			zipName, err := ArchiveFinalFiles(EntityDir)
+			if err != nil {
+				log.Println("Error archiving files: ", err)
+			}
+
+			// err = entity.Update(bson.M{"UUID": entity.UUID}, bson.M{"status": UploadingStatus}, db)
 			// if err != nil {
-			// 	log.Println("Error in archive final files: ", err)
+			// 	log.Println("Error updating entity: ", err)
+			// }
+
+			err = UploadEntity(zipName, entity)
+			if err != nil {
+				log.Println("Error uploading final files: ", err)
+			}
+
+			// err = entity.Update(bson.M{"UUID": entity.UUID}, bson.M{"aws_link": awsLink})
+			// if err != nil {
+			// 	log.Println("Error updating entity: ", err)
 			// }
 		default:
 		}
@@ -160,20 +177,20 @@ func matchAttrs(attr *html.Attribute, entity *Entity) {
 
 // See if this URL has already been saved into the
 // database - if so, return it.
-func checkExistingEntity(url string, e *Entity) error {
-	err := e.Find(bson.M{"url": url})
+func checkExistingEntity(url string, e *Entity, db *mgo.Collection) error {
+	err := e.Find(bson.M{"url": url}, db)
 
 	return err
 }
 
 // Create a new entity to persist into the database - start HTML extraction.
-func createNewEntity(url string, entity *Entity) error {
+func createNewEntity(url string, entity *Entity, db *mgo.Collection) error {
 	err := NewEntityDir()
 	if err != nil {
 		log.Println("Error creating entity dir: ", err)
 	}
 
-	go ExtractData(entity, url)
+	go ExtractData(entity, url, db)
 
 	id, err := uuid.NewV4()
 	if err != nil {
@@ -187,7 +204,7 @@ func createNewEntity(url string, entity *Entity) error {
 	entity.CreatedAt = time.Now()
 
 	// Persist new entity into the database.
-	err = entity.Create()
+	err = entity.Create(db)
 
 	return err
 }

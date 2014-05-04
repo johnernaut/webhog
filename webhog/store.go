@@ -1,6 +1,7 @@
 package webhog
 
 import (
+	"archive/tar"
 	"bytes"
 	"compress/gzip"
 	"crypto/rand"
@@ -10,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -96,40 +98,67 @@ func StoreHTML(html bytes.Buffer, entDir string) (err error) {
 	return err
 }
 
-func ArchiveFinalFiles(entDir string) (err error) {
-	var buf = new(bytes.Buffer)
-	gz := gzip.NewWriter(buf)
+// Create a tar.gz compressed dir and add in found files
+// for upload.
+func ArchiveFinalFiles(entDir string) (string, error) {
+	lastEl := strings.Split(entDir, "/")
+	zippedName := lastEl[len(lastEl)-1] + ".tar.gz"
+	finalDir := strings.Join(lastEl[0:len(lastEl)-1], "/")
 
-	defer gz.Close()
+	fw, err := os.Create(finalDir + "/" + zippedName)
+	if err != nil {
+		return "", err
+	}
 
-	files, err := ioutil.ReadDir(entDir)
+	defer fw.Close()
+
+	gw := gzip.NewWriter(fw)
+	defer gw.Close()
+
+	tw := tar.NewWriter(gw)
+	defer tw.Close()
+
+	dir, err := ioutil.ReadDir(entDir)
+	if err != nil {
+		return "", err
+	}
+
+	for _, file := range dir {
+		curPath := entDir + "/" + file.Name()
+		err := writeTar(curPath, tw, file)
+		if err != nil {
+			return "", err
+			break
+		}
+	}
+
+	return finalDir + "/" + zippedName, err
+}
+
+// Write the files into the tar dir
+func writeTar(path string, tw *tar.Writer, fi os.FileInfo) error {
+	fr, err := os.Open(path)
 	if err != nil {
 		return err
 	}
 
-	for _, file := range files {
-		data, err := ioutil.ReadFile(entDir + "/" + file.Name())
-		if err != nil {
-			return err
-		}
+	defer fr.Close()
 
-		_, err = gz.Write(data)
-		if err != nil {
-			return err
-		}
+	h := new(tar.Header)
+	h.Name = fi.Name()
+	h.Size = fi.Size()
+	h.Mode = int64(fi.Mode())
+	h.ModTime = fi.ModTime()
 
-		f, err := os.Create(entDir + "/" + file.Name() + ".gz")
-		if err != nil {
-			return err
-		}
-
-		_, err = io.Copy(f, buf)
-		if err != nil {
-			return err
-		}
+	err = tw.WriteHeader(h)
+	if err != nil {
+		return err
 	}
 
-	err = gz.Close()
+	_, err = io.Copy(tw, fr)
+	if err != nil {
+		return err
+	}
 
 	return err
 }

@@ -6,19 +6,12 @@ import (
 	"log"
 )
 
-// Type to hold DB connection information
-type connection struct {
-	Sess *mgo.Session
-	C    *mgo.Collection
-}
-
-var Db *connection
-
 // Interface that wraps DB models for a common
 // querying interface.
 type Model interface {
-	Find(interface{}) error
-	Create() error
+	Find(interface{}, *mgo.Collection) error
+	Create(*mgo.Collection) error
+	Update(interface{}, interface{}, *mgo.Collection) error
 }
 
 // Hold a reference to all models.
@@ -33,7 +26,6 @@ func Register(m Model) {
 // Connect to the given database and pass the connection into
 // martini
 func DB() martini.Handler {
-	Db = new(connection)
 	session, err := mgo.Dial(Config.mongodb)
 	if err != nil {
 		log.Panicln("Error establishing database connection: ", err)
@@ -42,10 +34,7 @@ func DB() martini.Handler {
 	return func(c martini.Context) {
 		s := session.Clone()
 
-		Db.Sess = s
-		Db.C = s.DB("webhog").C("entities")
-
-		c.Map(Db.C)
+		c.Map(s.DB("webhog").C("entities"))
 		defer s.Close()
 		c.Next()
 	}
