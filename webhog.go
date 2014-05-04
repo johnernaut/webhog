@@ -5,6 +5,7 @@ import (
 	"github.com/johnernaut/webhog/webhog"
 	"github.com/martini-contrib/binding"
 	"github.com/martini-contrib/render"
+	"labix.org/v2/mgo/bson"
 	"net/http"
 	"runtime"
 )
@@ -40,6 +41,17 @@ func main() {
 		entity, err := webhog.NewScraper(url.Url)
 		if err != nil {
 			r.JSON(400, map[string]interface{}{"errors": err.Error()})
+		} else {
+			r.JSON(200, entity)
+		}
+	})
+
+	m.Get("/entity/:uuid", func(params martini.Params, r render.Render) {
+		entity := new(webhog.Entity)
+		err := entity.Find(bson.M{"uuid": params["uuid"]})
+
+		if err != nil {
+			r.JSON(400, map[string]interface{}{"errors": "Entity not found."})
 		} else {
 			r.JSON(200, entity)
 		}
