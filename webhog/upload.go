@@ -11,13 +11,13 @@ func UploadEntity(dir string, entity *Entity) (string, error) {
 	spl := strings.Split(dir, "/")
 	endDir := spl[len(spl)-1]
 
-	auth, err := aws.EnvAuth()
-	if err != nil {
-		return "", err
-	}
+	// auth, err := aws.EnvAuth()
+	// if err != nil {
+	// 	return "", err
+	// }
 
 	// Open Bucket
-	s := s3.New(auth, aws.USEast)
+	s := s3.New(aws.Auth{Config.AwsKey, Config.AwsSecret}, aws.USEast)
 	bucket := s.Bucket(Config.bucket)
 
 	b, err := ioutil.ReadFile(dir)

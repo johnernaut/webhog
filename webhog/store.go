@@ -128,7 +128,6 @@ func ArchiveFinalFiles(entDir string) (string, error) {
 		err := writeTar(curPath, tw, file)
 		if err != nil {
 			return "", err
-			break
 		}
 	}
 
