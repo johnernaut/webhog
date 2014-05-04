@@ -2,6 +2,7 @@ package webhog
 
 import (
 	"github.com/kylelemons/go-gypsy/yaml"
+	"log"
 	"os"
 	"strings"
 )
@@ -27,6 +28,15 @@ func LoadConfig() error {
 	Config.AwsKey, _ = conf.Get(getEnv() + ".aws_key")
 	Config.AwsSecret, _ = conf.Get(getEnv() + ".aws_secret")
 	Config.bucket, _ = conf.Get(getEnv() + ".bucket")
+
+	f, err := os.OpenFile("webhog_"+getEnv()+".log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal("Error writing log file: ", err)
+	}
+
+	defer f.Close()
+
+	log.SetOutput(f)
 
 	return err
 }
