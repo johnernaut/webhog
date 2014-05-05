@@ -7,7 +7,6 @@ import (
 	"crypto/rand"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
