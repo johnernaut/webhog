@@ -81,7 +81,6 @@ func StoreHTML(html bytes.Buffer, entDir string) (err error) {
 
 	// full path of the html filed to be saved
 	finalPath := entDir + "/" + fileName
-	log.Println("Ent dir: ", entDir)
 
 	newFile, err := os.Create(finalPath)
 	if err != nil {

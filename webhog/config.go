@@ -34,8 +34,6 @@ func LoadConfig() error {
 		log.Fatal("Error writing log file: ", err)
 	}
 
-	defer f.Close()
-
 	log.SetOutput(f)
 
 	return err

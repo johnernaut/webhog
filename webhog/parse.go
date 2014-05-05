@@ -181,6 +181,8 @@ func createNewEntity(url string, entity *Entity) error {
 
 // Archive / upload final entity HTML
 func finalizeEntity(entity *Entity, doc *html.Node, entDir string) {
+	log.Println("Entity tmp directory: ", entDir)
+
 	var finalHTML bytes.Buffer
 	bl := html.Render(&finalHTML, doc)
 	if bl != nil {
