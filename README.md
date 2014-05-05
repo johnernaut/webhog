@@ -21,6 +21,4 @@ development:
 production:
 staging:
 ```
-
-##TODO
-* finish ZIP / Upload to S3 functionality
+The setting root-key is established via a `MARTINI_ENV` environment variable that you should set.

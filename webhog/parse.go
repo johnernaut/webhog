@@ -62,36 +62,7 @@ func ExtractData(entity *Entity, url string) {
 	for {
 		select {
 		case <-done:
-			var finalHTML bytes.Buffer
-			bl := html.Render(&finalHTML, doc)
-			if bl != nil {
-				log.Println(bl)
-			}
-
-			err := StoreHTML(finalHTML, EntityDir)
-			if err != nil {
-				log.Println("Error in StoreHTML: ", err)
-			}
-
-			zipName, err := ArchiveFinalFiles(EntityDir)
-			if err != nil {
-				log.Println("Error archiving files: ", err)
-			}
-
-			err = entity.Update(bson.M{"uuid": entity.UUID}, bson.M{"$set": bson.M{"status": UploadingStatus}})
-			if err != nil {
-				log.Println("Error updating entity: ", err)
-			}
-
-			awsLink, err := UploadEntity(zipName, entity)
-			if err != nil {
-				log.Println("Error uploading final files: ", err)
-			}
-
-			err = entity.Update(bson.M{"uuid": entity.UUID}, bson.M{"$set": bson.M{"aws_link": awsLink, "status": CompleteStatus}})
-			if err != nil {
-				log.Println("Error updating entity: ", err)
-			}
+			go finalizeEntity(entity, doc, EntityDir)
 		default:
 		}
 	}
@@ -206,4 +177,38 @@ func createNewEntity(url string, entity *Entity) error {
 	err = entity.Create()
 
 	return err
+}
+
+// Archive / upload final entity HTML
+func finalizeEntity(entity *Entity, doc *html.Node, entDir string) {
+	var finalHTML bytes.Buffer
+	bl := html.Render(&finalHTML, doc)
+	if bl != nil {
+		log.Println(bl)
+	}
+
+	err := StoreHTML(finalHTML, entDir)
+	if err != nil {
+		log.Println("Error in StoreHTML: ", err)
+	}
+
+	zipName, err := ArchiveFinalFiles(entDir)
+	if err != nil {
+		log.Println("Error archiving files: ", err)
+	}
+
+	err = entity.Update(bson.M{"uuid": entity.UUID}, bson.M{"$set": bson.M{"status": UploadingStatus}})
+	if err != nil {
+		log.Println("Error updating entity: ", err)
+	}
+
+	awsLink, err := UploadEntity(zipName, entity)
+	if err != nil {
+		log.Println("Error uploading final files: ", err)
+	}
+
+	err = entity.Update(bson.M{"uuid": entity.UUID}, bson.M{"$set": bson.M{"aws_link": awsLink, "status": CompleteStatus}})
+	if err != nil {
+		log.Println("Error updating entity: ", err)
+	}
 }

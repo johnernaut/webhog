@@ -42,7 +42,7 @@ func LoadConfig() error {
 }
 
 func getEnv() string {
-	env := strings.ToLower(os.Getenv("GO_ENV"))
+	env := strings.ToLower(os.Getenv("MARTINI_ENV"))
 	if env == "" || env == "development" {
 		return "development"
 	}
