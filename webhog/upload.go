@@ -17,7 +17,7 @@ func UploadEntity(dir string, entity *Entity) (string, error) {
 	// }
 
 	// Open Bucket
-	s := s3.New(aws.Auth{Config.AwsKey, Config.AwsSecret}, aws.USWest)
+	s := s3.New(aws.Auth{Config.AwsKey, Config.AwsSecret}, aws.USWest2)
 	bucket := s.Bucket(Config.bucket)
 
 	b, err := ioutil.ReadFile(dir)
