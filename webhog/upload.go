@@ -25,7 +25,7 @@ func UploadEntity(dir string, entity *Entity) (string, error) {
 		return "", err
 	}
 
-	err = bucket.Put("/"+endDir, b, "text/plain", s3.BucketOwnerFull)
+	err = bucket.Put("/"+endDir, b, "text/plain", s3.PublicRead)
 	if err != nil {
 		return "", err
 	}
