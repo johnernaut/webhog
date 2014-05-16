@@ -1,0 +1,13 @@
+{
+  "name": "flow.js",
+  "version": "2.5.0",
+  "main": "./dist/flow.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "samples"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "flow.js",
+  "version": "2.5.0",
+  "main": "./dist/flow.js",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "samples"
+  ],
+  "homepage": "https://github.com/flowjs/flow.js",
+  "_release": "2.5.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.5.0",
+    "commit": "c7c90ed9e111d288bc4b747b895f0ce40b8bcbfc"
+  },
+  "_source": "git://github.com/flowjs/flow.js.git",
+  "_target": "~2",
+  "_originalSource": "flow.js"
+}
