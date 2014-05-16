@@ -7,6 +7,7 @@
 // use this if you want to recursively match all subfolders:
 // 'test/spec/**/*.js'
 
+var proxySnippet = require('grunt-connect-proxy/lib/utils').proxyRequest;
 module.exports = function (grunt) {
 
   // Load grunt tasks automatically
@@ -63,6 +64,15 @@ module.exports = function (grunt) {
 
     // The actual grunt server settings
     connect: {
+      proxies: [
+        {
+          context: '/api',
+          host: 'localhost',
+          port: 3000,
+          https: false,
+          changeOrigin: true
+        }
+      ],
       options: {
         port: 9000,
         // Change this to '0.0.0.0' to access the server from outside.
@@ -71,11 +81,18 @@ module.exports = function (grunt) {
       },
       livereload: {
         options: {
-          open: true,
+          open: false,
           base: [
             '.tmp',
             '<%= yeoman.app %>'
-          ]
+          ],
+          middleware: function (connect) {
+            return [
+              proxySnippet,
+              connect.static(require('path').resolve('.tmp')),
+              connect.static(require('path').resolve('app'))
+            ];
+          }
         }
       },
       test: {
@@ -115,6 +132,7 @@ module.exports = function (grunt) {
 
     // Empties folders to start fresh
     clean: {
+      options: { force: true },
       dist: {
         files: [{
           dot: true,
@@ -234,6 +252,7 @@ module.exports = function (grunt) {
     },
 
     imagemin: {
+      options: { force: true },
       dist: {
         files: [{
           expand: true,
@@ -307,13 +326,19 @@ module.exports = function (grunt) {
             '*.html',
             'views/{,*/}*.html',
             'images/{,*/}*.{webp}',
-            'fonts/*'
+            'fonts/*',
+            'bower_components/**/*'
           ]
         }, {
           expand: true,
           cwd: '.tmp/images',
           dest: '<%= yeoman.dist %>/images',
           src: ['generated/*']
+        }, {
+          expand: true,
+          cwd: '<%= yeoman.app %>/bower_components/bootstrap/fonts',
+          dest: '<%= yeoman.dist %>/fonts',
+          src: '*.*'
         }]
       },
       styles: {
@@ -382,6 +407,7 @@ module.exports = function (grunt) {
 
     grunt.task.run([
       'clean:server',
+      'configureProxies:server',
       'bowerInstall',
       'concurrent:server',
       'autoprefixer',
