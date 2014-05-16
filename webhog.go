@@ -7,7 +7,6 @@ import (
 	_ "github.com/martini-contrib/gzip"
 	"github.com/martini-contrib/render"
 	"labix.org/v2/mgo/bson"
-	"log"
 	"net/http"
 	"runtime"
 )
