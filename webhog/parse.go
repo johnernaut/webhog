@@ -47,7 +47,7 @@ func ExtractData(entity *Entity, url string) {
 
 	res, err := http.Get(url)
 	if err != nil {
-		log.Println("Error requesting URL data: ", err)
+		log.Panicln("Error requesting URL data: ", err)
 	}
 
 	defer res.Body.Close()
