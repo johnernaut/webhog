@@ -8,12 +8,13 @@ import (
 	"github.com/martini-contrib/render"
 	"labix.org/v2/mgo/bson"
 	"net/http"
+	"net/url"
 	"runtime"
 )
 
 type Url struct {
-	Url  string `json:"url"`
-	UUID string `json:"uuid"`
+	Url  string `form:"url" json:"url"`
+	UUID string `form:"uuid" json:"uuid"`
 }
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 	m.Use(martini.Static("public"))
 
 	m.Group("/api", func(r martini.Router) {
-		r.Post("/scrape", binding.Json(Url{}), func(url Url, r render.Render) {
+		r.Post("/scrape", binding.Bind(Url{}), func(url Url, r render.Render) {
 			entity, err := webhog.NewScraper(url.Url)
 			if err != nil {
 				r.JSON(400, map[string]interface{}{"errors": err.Error()})
@@ -65,4 +66,14 @@ func KeyRequired() martini.Handler {
 			r.JSON(401, map[string]interface{}{"error": "Invalid API key."})
 		}
 	}
+}
+
+func (urlType Url) Validate(errors binding.Errors, req *http.Request) binding.Errors {
+	_, err := url.ParseRequestURI(urlType.Url)
+	if err != nil {
+		errors = append(errors, binding.Error{
+			Message: "Malformed URL. Please provide proper URL formatting.",
+		})
+	}
+	return errors
 }
