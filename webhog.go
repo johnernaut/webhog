@@ -36,7 +36,7 @@ func main() {
 	m.Use(martini.Static("public"))
 
 	m.Group("/api", func(r martini.Router) {
-		r.Post("/scrape", binding.Bind(Url{}), func(url Url, r render.Render) {
+		r.Post("/scrape", KeyRequired, binding.Bind(Url{}), func(url Url, r render.Render) {
 			entity, err := webhog.NewScraper(url.Url)
 			if err != nil {
 				r.JSON(400, map[string]interface{}{"errors": err.Error()})
