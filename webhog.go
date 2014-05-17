@@ -36,7 +36,7 @@ func main() {
 	m.Use(martini.Static("public"))
 
 	m.Group("/api", func(r martini.Router) {
-		r.Post("/scrape", binding.Bind(Url{}), func(url Url, r render.Render) {
+		r.Post("/scrape", KeyRequired(), binding.Bind(Url{}), func(url Url, r render.Render) {
 			entity, err := webhog.NewScraper(url.Url)
 			if err != nil {
 				r.JSON(400, map[string]interface{}{"errors": err.Error()})
@@ -72,10 +72,11 @@ func main() {
 }
 
 func KeyRequired() martini.Handler {
-	return func(res http.ResponseWriter, req *http.Request, r render.Render) {
+	return func(context martini.Context, res http.ResponseWriter, req *http.Request) {
 		if req.Header.Get("X-API-KEY") != webhog.Config.ApiKey {
-			r.JSON(401, map[string]interface{}{"error": "Invalid API key."})
+			http.Error(res, "Invalid API key.", http.StatusForbidden)
 		}
+		context.Next()
 	}
 }
 
