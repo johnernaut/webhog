@@ -22,10 +22,20 @@ var app = angular
           }]
         }
       })
+      .when('/entity/:slug', {
+        templateUrl: 'views/entity.html',
+        controller: 'EntityController',
+        resolve: {
+          entity: ['$route', 'Restangular', function ($route, Restangular) {
+            return Restangular.one('entity', $route.current.params.slug).get();
+          }]
+        }
+      })
       .otherwise({
         redirectTo: '/'
       });
   });
+
 app.run([
   'Restangular',
   '$alert',
