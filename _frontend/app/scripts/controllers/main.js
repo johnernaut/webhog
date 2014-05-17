@@ -3,8 +3,8 @@
 angular.module('webhog')
   .controller('MainCtrl', [
     '$scope',
-    'entity',
-    function ($scope, entity) {
-      $scope.entity = entity;
+    'entities',
+    function ($scope, entities) {
+      $scope.entities = entities;
     }
   ]);

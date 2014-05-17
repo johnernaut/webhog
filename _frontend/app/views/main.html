@@ -1,15 +1,23 @@
-<div class="jumbotron">
-  <h1>'Allo, 'Allo!</h1>
-  <p class="lead">
-    <img src="images/yeoman.png" alt="I'm Yeoman"><br>
-    Always a pleasure scaffolding your apps.
-  </p>
-  <p><a class="btn btn-lg btn-success" ng-href="#">Splendid!<span class="glyphicon glyphicon-ok"></span></a></p>
-</div>
-
-<div class="row marketing">
-  <h4>{{entity.url}} ({{entity.uuid}})</h4>
-  <p>
-    {{entity.aws_link}}
-  </p>
+<div class="row">
+  <header>
+    <h1>Entities</h1>
+  </header>
+  <div class="row">
+    <div class="col-6 col-sm-6 col-lg-4" ng-repeat='entity in entities'>
+      <h3><a href="#!/entity/{{entity.uuid}}">{{entity.url}}</a></h3>
+      <div class="form-group">
+        <h5>
+          Status: <span class="label label-success">{{entity.status}}</span>
+        </h5>
+        <h5>
+          UUID: <em>{{entity.uuid}}</em>
+        </h5>
+      </div>
+      <div class="form-group player-controls">
+        <a class="btn btn-primary btn-xs" href="{{entity.aws_link}}" download="{{entity.aws_link}}" target="_blank">
+          <span class="glyphicon glyphicon-download"></span> Download
+        </a>
+      </div>
+    </div>
+  </div>
 </div>

@@ -36,7 +36,7 @@ func main() {
 	m.Use(martini.Static("public"))
 
 	m.Group("/api", func(r martini.Router) {
-		r.Post("/scrape", KeyRequired, binding.Bind(Url{}), func(url Url, r render.Render) {
+		r.Post("/scrape", binding.Bind(Url{}), func(url Url, r render.Render) {
 			entity, err := webhog.NewScraper(url.Url)
 			if err != nil {
 				r.JSON(400, map[string]interface{}{"errors": err.Error()})
@@ -53,6 +53,17 @@ func main() {
 				r.JSON(200, map[string]interface{}{"errors": "Entity not found."})
 			} else {
 				r.JSON(200, entity)
+			}
+		})
+
+		r.Get("/entities", func(params martini.Params, r render.Render) {
+			entity := new(webhog.Entity)
+			entities, err := entity.All()
+
+			if err != nil {
+				r.JSON(200, map[string]interface{}{"errors": "Entity not found."})
+			} else {
+				r.JSON(200, entities)
 			}
 		})
 	})

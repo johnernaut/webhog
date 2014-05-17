@@ -20,6 +20,7 @@ type Model interface {
 	Find(interface{}) error
 	Create() error
 	Update(interface{}, interface{}) error
+	All() ([]Entity, error)
 }
 
 // Hold a reference to all models.

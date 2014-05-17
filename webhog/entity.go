@@ -25,6 +25,14 @@ func (entity *Entity) Find(query interface{}) error {
 	return err
 }
 
+// Find all entities
+func (entity *Entity) All() ([]Entity, error) {
+	entities := []Entity{}
+	err := Conn.C.Find(nil).All(&entities)
+
+	return entities, err
+}
+
 // Update an entities' attributes
 func (entity *Entity) Update(query interface{}, updates interface{}) error {
 	// query is url

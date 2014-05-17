@@ -17,8 +17,8 @@ var app = angular
         templateUrl: 'views/main.html',
         controller: 'MainCtrl',
         resolve: {
-          entity: ['$route', 'Restangular', function ($route, Restangular) {
-            return Restangular.one('entity', '34f7d4db-76ca-4b81-6d78-0759e0afe6bd').get();
+          entities: ['$route', 'Restangular', function ($route, Restangular) {
+            return Restangular.all('entities').getList();
           }]
         }
       })
