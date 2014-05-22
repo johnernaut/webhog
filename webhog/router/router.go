@@ -4,12 +4,39 @@ import (
 	"github.com/go-martini/martini"
 	"github.com/johnernaut/webhog/webhog"
 	"github.com/martini-contrib/binding"
-	_ "github.com/martini-contrib/gzip"
 	"github.com/martini-contrib/render"
 	"labix.org/v2/mgo/bson"
 	"net/http"
 	"net/url"
 )
+
+func LoadRoutes() {
+	// Start the server.
+	m := martini.Classic()
+
+	m.Use(render.Renderer())
+	m.Use(martini.Recovery())
+	m.Use(martini.Static("public"))
+
+	m.Group("/api", func(r martini.Router) {
+		r.Post("/scrape", KeyRequired(), binding.Bind(Url{}), Scrape)
+
+		r.Get("/entity/:uuid", Entity)
+
+		r.Get("/entities", Entities)
+	})
+
+	m.Run()
+}
+
+func KeyRequired() martini.Handler {
+	return func(context martini.Context, res http.ResponseWriter, req *http.Request) {
+		if req.Header.Get("X-API-KEY") != webhog.Config.ApiKey {
+			http.Error(res, "Invalid API key.", http.StatusForbidden)
+		}
+		context.Next()
+	}
+}
 
 type Url struct {
 	Url  string `form:"url" json:"url"`
