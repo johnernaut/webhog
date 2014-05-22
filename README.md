@@ -15,8 +15,8 @@ Create a `webhog.yml` file in the running directory.  The following options are 
 development:
   mongodb: mongodb://127.0.0.1:27017/webhog
   api_key: SCRAPEAPI
-  aws_key: AWSKEY
-  aws_secret: AWSSECRET
+  aws_key: <env var name for s3 key>
+  aws_secret: <env var name for s3 secret>
   bucket: mybucket
 production:
 staging:
