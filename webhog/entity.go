@@ -16,6 +16,10 @@ type Entity struct {
 	CreatedAt time.Time     `bson:"created_at" json:"created_at"`
 }
 
+// Set a URL's expiration time to 1 week before it needs
+// to be reprocessed.
+var ExpirationTime = time.Hour * 168
+
 // Find an Entity by UUID and return the AWS S3 link (or status if upload
 // is incomplete) - create if it doesn't exist.
 func (entity *Entity) Find(query interface{}) error {

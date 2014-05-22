@@ -146,9 +146,22 @@ func matchAttrs(attr *html.Attribute, entity *Entity) {
 }
 
 // See if this URL has already been saved into the
-// database - if so, return it.
+// database and isn't expired - if so, return it.
 func checkExistingEntity(url string, e *Entity) error {
 	err := e.Find(bson.M{"url": url})
+
+	exp := e.CreatedAt.Add(ExpirationTime)
+
+	// update the entity and re-download / parse assets
+	if time.Now().After(exp) {
+		err = e.Update(bson.M{"uuid": e.UUID},
+			bson.M{"$set": bson.M{"aws_link": "", "status": ParsingStatus, "created_at": time.Now()}})
+		if err != nil {
+			log.Println("Error updating entity: ", err)
+		}
+
+		go ExtractData(e, url)
+	}
 
 	return err
 }

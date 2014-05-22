@@ -24,9 +24,13 @@ func LoadConfig() error {
 
 	Config.mongodb, _ = conf.Get(getEnv() + ".mongodb")
 	Config.ApiKey, _ = conf.Get(getEnv() + ".api_key")
-	Config.AwsKey, _ = conf.Get(getEnv() + ".aws_key")
-	Config.AwsSecret, _ = conf.Get(getEnv() + ".aws_secret")
 	Config.bucket, _ = conf.Get(getEnv() + ".bucket")
+
+	key, _ := conf.Get(getEnv() + ".aws_key")
+	secret, _ := conf.Get(getEnv() + ".aws_secret")
+
+	Config.AwsKey = os.Getenv(key)
+	Config.AwsSecret = os.Getenv(secret)
 
 	return err
 }
