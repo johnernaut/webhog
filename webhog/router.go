@@ -1,8 +1,7 @@
-package router
+package webhog
 
 import (
 	"github.com/go-martini/martini"
-	"github.com/johnernaut/webhog/webhog"
 	"github.com/martini-contrib/binding"
 	"github.com/martini-contrib/render"
 	"labix.org/v2/mgo/bson"
@@ -21,7 +20,7 @@ func LoadRoutes() {
 	m.Group("/api", func(r martini.Router) {
 		r.Post("/scrape", KeyRequired(), binding.Bind(Url{}), Scrape)
 
-		r.Get("/entity/:uuid", Entity)
+		r.Get("/entity/:uuid", GetEntity)
 
 		r.Get("/entities", Entities)
 	})
@@ -31,7 +30,7 @@ func LoadRoutes() {
 
 func KeyRequired() martini.Handler {
 	return func(context martini.Context, res http.ResponseWriter, req *http.Request) {
-		if req.Header.Get("X-API-KEY") != webhog.Config.ApiKey {
+		if req.Header.Get("X-API-KEY") != Config.ApiKey {
 			http.Error(res, "Invalid API key.", http.StatusForbidden)
 		}
 		context.Next()
@@ -44,7 +43,7 @@ type Url struct {
 }
 
 func Scrape(url Url, r render.Render) {
-	entity, err := webhog.NewScraper(url.Url)
+	entity, err := NewScraper(url.Url)
 	if err != nil {
 		r.JSON(400, map[string]interface{}{"errors": err.Error()})
 	} else {
@@ -52,9 +51,9 @@ func Scrape(url Url, r render.Render) {
 	}
 }
 
-func Entity(params martini.Params, r render.Render) {
-	entity := new(webhog.Entity)
-	err := entity.Find(bson.M{"uuid": params["uuid"]})
+func GetEntity(params martini.Params, r render.Render) {
+	entity := new(Entity)
+	err := Find(entity, bson.M{"uuid": params["uuid"]}).One(entity)
 
 	if err != nil {
 		r.JSON(200, map[string]interface{}{"errors": "Entity not found."})
@@ -64,11 +63,12 @@ func Entity(params martini.Params, r render.Render) {
 }
 
 func Entities(params martini.Params, r render.Render) {
-	entity := new(webhog.Entity)
-	entities, err := entity.All()
+	entities := new([]Entity)
+	entity := new(Entity)
+	err := Find(entity, nil).All(entities)
 
 	if err != nil {
-		r.JSON(200, map[string]interface{}{"errors": "Entity not found."})
+		r.JSON(200, map[string]interface{}{"errors": "Entities not found."})
 	} else {
 		r.JSON(200, entities)
 	}

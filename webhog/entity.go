@@ -20,41 +20,8 @@ type Entity struct {
 // to be reprocessed.
 var ExpirationTime = time.Hour * 168
 
-// Find an Entity by UUID and return the AWS S3 link (or status if upload
-// is incomplete) - create if it doesn't exist.
-func (entity *Entity) Find(query interface{}) error {
-	// query is url
-	err := Conn.C.Find(query).One(&entity)
-
-	return err
-}
-
-// Find all entities
-func (entity *Entity) All() ([]Entity, error) {
-	entities := []Entity{}
-	err := Conn.C.Find(nil).All(&entities)
-
-	return entities, err
-}
-
-// Update an entities' attributes
-func (entity *Entity) Update(query interface{}, updates interface{}) error {
-	// query is url
-	err := Conn.C.Update(query, updates)
-
-	return err
-}
-
-// Create a new entity object in the database.
-func (entity *Entity) Create() error {
-	err := Conn.C.Insert(entity)
-	if err != nil {
-		return err
-	}
-
-	err = Conn.C.Find(bson.M{"uuid": entity.UUID}).One(&entity)
-
-	return err
+func (e Entity) Collection() string {
+	return "entities"
 }
 
 func init() {

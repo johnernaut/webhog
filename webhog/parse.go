@@ -148,13 +148,13 @@ func matchAttrs(attr *html.Attribute, entity *Entity) {
 // See if this URL has already been saved into the
 // database and isn't expired - if so, return it.
 func checkExistingEntity(url string, e *Entity) error {
-	err := e.Find(bson.M{"url": url})
+	err := Find(e, bson.M{"url": url}).One(&e)
 
 	exp := e.CreatedAt.Add(ExpirationTime)
 
 	// update the entity and re-download / parse assets
 	if time.Now().After(exp) {
-		err = e.Update(bson.M{"uuid": e.UUID},
+		err = Update(e, bson.M{"uuid": e.UUID},
 			bson.M{"$set": bson.M{"aws_link": "", "status": ParsingStatus, "created_at": time.Now()}})
 		if err != nil {
 			log.Println("Error updating entity: ", err)
@@ -187,7 +187,15 @@ func createNewEntity(url string, entity *Entity) error {
 	entity.CreatedAt = time.Now()
 
 	// Persist new entity into the database.
-	err = entity.Create()
+	err = Create(entity)
+	if err != nil {
+		return err
+	}
+
+	err = Find(entity, bson.M{"uuid": entity.UUID}).One(&entity)
+	if err != nil {
+		return err
+	}
 
 	return err
 }
@@ -212,7 +220,7 @@ func finalizeEntity(entity *Entity, doc *html.Node, entDir string) {
 		log.Println("Error archiving files: ", err)
 	}
 
-	err = entity.Update(bson.M{"uuid": entity.UUID}, bson.M{"$set": bson.M{"status": UploadingStatus}})
+	err = Update(entity, bson.M{"uuid": entity.UUID}, bson.M{"$set": bson.M{"status": UploadingStatus}})
 	if err != nil {
 		log.Println("Error updating entity: ", err)
 	}
@@ -222,7 +230,7 @@ func finalizeEntity(entity *Entity, doc *html.Node, entDir string) {
 		log.Println("Error uploading final files: ", err)
 	}
 
-	err = entity.Update(bson.M{"uuid": entity.UUID}, bson.M{"$set": bson.M{"aws_link": awsLink, "status": CompleteStatus}})
+	err = Update(entity, bson.M{"uuid": entity.UUID}, bson.M{"$set": bson.M{"aws_link": awsLink, "status": CompleteStatus}})
 	if err != nil {
 		log.Println("Error updating entity: ", err)
 	}

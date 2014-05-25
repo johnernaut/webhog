@@ -63,6 +63,7 @@ func StoreResource(resource, attr, entDir string) (name string, err error) {
 		return "", err
 	}
 
+    io.Copy(ioutil.Discard, resp.Body)
 	defer resp.Body.Close()
 
 	_, err = io.Copy(newFile, resp.Body)
