@@ -43,6 +43,12 @@ func Update(m Model, query, updates interface{}) error {
 	return err
 }
 
+func Destroy(m Model, query interface{}) error {
+	cursor := Cursor(m)
+	err := cursor.Remove(query)
+	return err
+}
+
 func Create(m Model) error {
 	cursor := Cursor(m)
 	err := cursor.Insert(m)

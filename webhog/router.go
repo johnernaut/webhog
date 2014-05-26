@@ -23,6 +23,8 @@ func LoadRoutes() {
 		r.Get("/entity/:uuid", GetEntity)
 
 		r.Get("/entities", Entities)
+
+		r.Delete("/entity/:id", KeyRequired(), binding.Bind(Entity{}), DeleteEntity)
 	})
 
 	m.Run()
@@ -56,9 +58,19 @@ func GetEntity(params martini.Params, r render.Render) {
 	err := Find(entity, bson.M{"uuid": params["uuid"]}).One(entity)
 
 	if err != nil {
-		r.JSON(200, map[string]interface{}{"errors": "Entity not found."})
+		r.JSON(400, map[string]interface{}{"errors": "Entity not found."})
 	} else {
 		r.JSON(200, entity)
+	}
+}
+
+func DeleteEntity(entity Entity, r render.Render) {
+	err := Destroy(entity, bson.M{"_id": entity.Id})
+
+	if err != nil {
+		r.JSON(400, map[string]interface{}{"errors": "Entity not found."})
+	} else {
+		r.JSON(200, map[string]interface{}{"success": "Destroyed entity."})
 	}
 }
 

@@ -43,7 +43,7 @@ app.run([
   '$rootScope',
   function (Restangular, $alert, $location, $rootScope) {
     Restangular.setBaseUrl('/api');
-    Restangular.setDefaultHeaders({'X-API-KEY': 'SCRAPEAPI'});
+    Restangular.setDefaultHeaders({'X-API-KEY': 'SCRAPEAPI', 'Content-Type': 'application/json'});
     return Restangular.setErrorInterceptor(function (res) {
       if (res.status === 404 || res.status === 401) {
         $location.path('/');
